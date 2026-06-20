@@ -63,7 +63,6 @@ export function GlobalMap() {
         </CircleMarker>
       )),
     // worldData is a static import — the array never changes at runtime.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 

@@ -3,6 +3,12 @@ import type { AppState } from "@/lib/eco/types";
 import { useCarbonCalculator } from "@/hooks/useCarbonCalculator";
 import { computeStreak } from "@/lib/eco/store";
 
+/**
+ * Derives all metrics required by the Dashboard from raw AppState.
+ *
+ * All heavy computation is memoised — comparison and trend arrays are only
+ * rebuilt when their specific dependencies change, not on every render.
+ */
 export function useDashboardMetrics(state: AppState) {
   const {
     breakdown,
@@ -12,9 +18,16 @@ export function useDashboardMetrics(state: AppState) {
     comparison,
   } = useCarbonCalculator(state.footprint);
 
-  const totalSavings = state.log.length;
-  const adjusted = Math.max(0, total - state.points * 4);
-  const monthly = Math.round(adjusted / 12);
+  // Scalar derivations — all depend on total and state.points only.
+  const { adjusted, monthly, totalSavings, streak } = useMemo(() => {
+    const adj = Math.max(0, total - state.points * 4);
+    return {
+      adjusted: adj,
+      monthly: Math.round(adj / 12),
+      totalSavings: state.log.length,
+      streak: computeStreak(state.log),
+    };
+  }, [total, state.points, state.log]);
 
   const compareData = useMemo(
     () =>
@@ -39,8 +52,6 @@ export function useDashboardMetrics(state: AppState) {
     () => state.history.map((h) => ({ ...h, kg: Math.max(monthly, h.kg - state.points) })),
     [state.history, state.points, monthly],
   );
-
-  const streak = computeStreak(state.log);
 
   return {
     breakdown,

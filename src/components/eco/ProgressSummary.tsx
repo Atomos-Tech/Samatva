@@ -1,6 +1,7 @@
 import { memo, useMemo } from "react";
 import { TrendingDown, TrendingUp, Minus } from "lucide-react";
 import type { AppState } from "@/lib/eco/types";
+import { cn } from "@/lib/utils";
 
 interface ProgressSummaryProps {
   state: AppState;
@@ -50,13 +51,12 @@ export const ProgressSummary = memo(function ProgressSummary({
     >
       <div className="flex flex-wrap items-center gap-4">
         <div
-          className={`grid size-12 shrink-0 place-items-center rounded-xl ${
-            direction === "down"
-              ? "bg-forest-deep/15 text-forest-deep"
-              : direction === "up"
-                ? "bg-destructive/10 text-destructive"
-                : "bg-accent text-accent-foreground"
-          }`}
+          className={cn(
+            "grid size-12 shrink-0 place-items-center rounded-xl",
+            direction === "down" && "bg-forest-deep/15 text-forest-deep",
+            direction === "up" && "bg-destructive/10 text-destructive",
+            direction === "neutral" && "bg-accent text-accent-foreground",
+          )}
         >
           {direction === "down" ? (
             <TrendingDown className="size-6" aria-hidden="true" />
@@ -73,15 +73,19 @@ export const ProgressSummary = memo(function ProgressSummary({
           {direction === "down" ? (
             <p className="mt-0.5 font-display text-lg font-semibold text-foreground">
               You&apos;ve reduced your footprint by{" "}
-              <span className="text-forest-deep">{deltaKg} kg ({deltaPercent}%)</span> since you
-              started — that&apos;s the equivalent of{" "}
+              <span className="text-forest-deep">
+                {deltaKg} kg ({deltaPercent}%)
+              </span>{" "}
+              since you started — that&apos;s the equivalent of{" "}
               <span className="text-forest-deep">{Math.round(deltaKg / 21)} trees</span> planted!
             </p>
           ) : direction === "up" ? (
             <p className="mt-0.5 font-display text-lg font-semibold text-foreground">
               Your footprint has risen by{" "}
-              <span className="text-destructive">{deltaKg} kg ({deltaPercent}%)</span> since you
-              started. Check your highest category for quick wins.
+              <span className="text-destructive">
+                {deltaKg} kg ({deltaPercent}%)
+              </span>{" "}
+              since you started. Check your highest category for quick wins.
             </p>
           ) : (
             <p className="mt-0.5 font-display text-lg font-semibold text-foreground">

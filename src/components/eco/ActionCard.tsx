@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, type FC } from "react";
 import {
   Leaf,
   Bike,
@@ -33,7 +33,7 @@ import type { EcoAction } from "@/lib/eco/types";
  *
  * This map is the single source of truth for which icons are permitted.
  */
-const ICON_ALLOWLIST: Record<string, React.FC<LucideProps>> = {
+const ICON_ALLOWLIST: Record<string, FC<LucideProps>> = {
   Leaf,
   Bike,
   PlugZap,
@@ -53,13 +53,17 @@ const ICON_ALLOWLIST: Record<string, React.FC<LucideProps>> = {
   Thermometer,
 };
 
-function getIcon(name: string): React.FC<LucideProps> {
+function getIcon(name: string): FC<LucideProps> {
   return ICON_ALLOWLIST[name] ?? Leaf;
 }
 
+/** Props for the ActionCard component. */
 interface ActionCardProps {
+  /** The eco-action to display. */
   action: EcoAction;
+  /** Whether the user has already logged this action today. */
   isDone: boolean;
+  /** Called when the user toggles the action (log or un-log). */
   onToggle: (action: EcoAction) => void;
 }
 

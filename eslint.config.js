@@ -11,7 +11,7 @@ export default tseslint.config(
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
-      ecmaVersion: 2020,
+      ecmaVersion: 2022,
       globals: globals.browser,
     },
     plugins: {
@@ -33,7 +33,15 @@ export default tseslint.config(
         },
       ],
       "react-refresh/only-export-components": "off",
-      "@typescript-eslint/no-unused-vars": "off",
+      // Report unused variables as errors — silencing this allows dead code and typos to pass undetected.
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
     },
   },
   eslintPluginPrettier,

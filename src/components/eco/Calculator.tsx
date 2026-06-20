@@ -10,13 +10,25 @@ import { useCalculator, STEPS } from "@/hooks/useCalculator";
 
 const STEP_ICONS = [Car, Home, Utensils, ShoppingBag];
 
+/** Named indices for each wizard step — eliminates magic numbers in JSX. */
+const STEP_INDEX = {
+  TRAVEL: 0,
+  HOME: 1,
+  DIET: 2,
+  CONSUMPTION: 3,
+} as const;
+
+/** Props for the multi-step carbon footprint calculator wizard. */
 export function Calculator({
   state,
   onSave,
   onDone,
 }: {
+  /** Current application state used to seed the initial draft. */
   state: AppState;
+  /** Called with the validated footprint when the user completes the wizard. */
   onSave: (f: UserFootprint) => void;
+  /** Called after `onSave` to transition the user to the dashboard. */
   onDone: () => void;
 }) {
   const { step, draft, errors, totalTonnes, update, next, back, jumpToStep } = useCalculator(
@@ -93,77 +105,80 @@ export function Calculator({
       </ol>
 
       <div className="glass-card space-y-6 rounded-2xl p-6">
-        {step === 0 && (
+        {step === STEP_INDEX.TRAVEL && (
           <div className="space-y-6">
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-primary">
-              <span className="font-semibold">Did you know?</span> A single long-haul flight can equal the emissions of commuting by car for an entire year.
+              <span className="font-semibold">Did you know?</span> A single long-haul flight can
+              equal the emissions of commuting by car for an entire year.
             </div>
             <div className="grid gap-6 sm:grid-cols-2">
-            <SliderField
-              id="carKm"
-              label="Car distance per week"
-              unit="km"
-              max={2000}
-              value={draft.travel.carKmPerWeek}
-              onChange={(v) => update("travel", { carKmPerWeek: v })}
-            />
-            <SliderField
-              id="transitKm"
-              label="Public transit per week"
-              unit="km"
-              max={1000}
-              value={draft.travel.publicTransitKmPerWeek}
-              onChange={(v) => update("travel", { publicTransitKmPerWeek: v })}
-            />
-            <NumberField
-              id="flights"
-              label="Flights per year (return trips)"
-              max={50}
-              value={draft.travel.flightsPerYear}
-              onChange={(v) => update("travel", { flightsPerYear: v })}
-            />
-          </div>
+              <SliderField
+                id="carKm"
+                label="Car distance per week"
+                unit="km"
+                max={2000}
+                value={draft.travel.carKmPerWeek}
+                onChange={(v) => update("travel", { carKmPerWeek: v })}
+              />
+              <SliderField
+                id="transitKm"
+                label="Public transit per week"
+                unit="km"
+                max={1000}
+                value={draft.travel.publicTransitKmPerWeek}
+                onChange={(v) => update("travel", { publicTransitKmPerWeek: v })}
+              />
+              <NumberField
+                id="flights"
+                label="Flights per year (return trips)"
+                max={50}
+                value={draft.travel.flightsPerYear}
+                onChange={(v) => update("travel", { flightsPerYear: v })}
+              />
+            </div>
           </div>
         )}
 
-        {step === 1 && (
+        {step === STEP_INDEX.HOME && (
           <div className="space-y-6">
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-primary">
-              <span className="font-semibold">Did you know?</span> Switching to a 100% renewable energy tariff can instantly cut your home footprint by up to 80%.
+              <span className="font-semibold">Did you know?</span> Switching to a 100% renewable
+              energy tariff can instantly cut your home footprint by up to 80%.
             </div>
             <div className="grid gap-6 sm:grid-cols-2">
-            <NumberField
-              id="elec"
-              label="Electricity per month"
-              unit="kWh"
-              max={20000}
-              value={draft.home.electricityKwhPerMonth}
-              onChange={(v) => update("home", { electricityKwhPerMonth: v })}
-            />
-            <NumberField
-              id="gas"
-              label="Gas / heating per month"
-              unit="kWh"
-              max={20000}
-              value={draft.home.gasKwhPerMonth}
-              onChange={(v) => update("home", { gasKwhPerMonth: v })}
-            />
-            <SliderField
-              id="renewable"
-              label="Share from renewable tariff"
-              unit="%"
-              max={100}
-              value={draft.home.renewablePercent}
-              onChange={(v) => update("home", { renewablePercent: v })}
-            />
-          </div>
+              <NumberField
+                id="elec"
+                label="Electricity per month"
+                unit="kWh"
+                max={20000}
+                value={draft.home.electricityKwhPerMonth}
+                onChange={(v) => update("home", { electricityKwhPerMonth: v })}
+              />
+              <NumberField
+                id="gas"
+                label="Gas / heating per month"
+                unit="kWh"
+                max={20000}
+                value={draft.home.gasKwhPerMonth}
+                onChange={(v) => update("home", { gasKwhPerMonth: v })}
+              />
+              <SliderField
+                id="renewable"
+                label="Share from renewable tariff"
+                unit="%"
+                max={100}
+                value={draft.home.renewablePercent}
+                onChange={(v) => update("home", { renewablePercent: v })}
+              />
+            </div>
           </div>
         )}
 
-        {step === 2 && (
+        {step === STEP_INDEX.DIET && (
           <div className="space-y-6">
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-primary">
-              <span className="font-semibold">Did you know?</span> Producing 1kg of beef emits about 60kg of CO₂e, compared to just 1-2kg for most plant-based foods.
+              <span className="font-semibold">Did you know?</span> Producing 1kg of beef emits about
+              60kg of CO₂e, compared to just 1-2kg for most plant-based foods.
             </div>
             <div>
               <Label className="mb-2 block">Primary diet</Label>
@@ -204,34 +219,35 @@ export function Calculator({
           </div>
         )}
 
-        {step === 3 && (
+        {step === STEP_INDEX.CONSUMPTION && (
           <div className="space-y-6">
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-primary">
-              <span className="font-semibold">Did you know?</span> Extending the life of your clothes by just 9 months reduces their carbon footprint by up to 30%.
+              <span className="font-semibold">Did you know?</span> Extending the life of your
+              clothes by just 9 months reduces their carbon footprint by up to 30%.
             </div>
             <div className="grid gap-6 sm:grid-cols-2">
-            <SliderField
-              id="shopping"
-              label="Shopping intensity (1 = minimal · 5 = frequent)"
-              max={5}
-              min={1}
-              step={1}
-              value={draft.consumption.shoppingLevel}
-              onChange={(v) =>
-                update("consumption", {
-                  shoppingLevel: Math.max(1, Math.min(5, v)) as 1 | 2 | 3 | 4 | 5,
-                })
-              }
-            />
-            <SliderField
-              id="recycle"
-              label="Share of waste recycled"
-              unit="%"
-              max={100}
-              value={draft.consumption.recyclesPercent}
-              onChange={(v) => update("consumption", { recyclesPercent: v })}
-            />
-          </div>
+              <SliderField
+                id="shopping"
+                label="Shopping intensity (1 = minimal · 5 = frequent)"
+                max={5}
+                min={1}
+                step={1}
+                value={draft.consumption.shoppingLevel}
+                onChange={(v) =>
+                  update("consumption", {
+                    shoppingLevel: Math.max(1, Math.min(5, v)) as 1 | 2 | 3 | 4 | 5,
+                  })
+                }
+              />
+              <SliderField
+                id="recycle"
+                label="Share of waste recycled"
+                unit="%"
+                max={100}
+                value={draft.consumption.recyclesPercent}
+                onChange={(v) => update("consumption", { recyclesPercent: v })}
+              />
+            </div>
           </div>
         )}
       </div>

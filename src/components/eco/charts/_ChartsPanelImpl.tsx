@@ -1,4 +1,3 @@
-import { memo } from "react";
 import {
   Bar,
   BarChart,
@@ -62,7 +61,10 @@ export default function ChartsPanelImpl({
                 strokeWidth={3}
               >
                 {pieData.map((entry) => (
-                  <Cell key={entry.name} fill={CHART_COLORS[pieData.indexOf(entry) % CHART_COLORS.length]} />
+                  <Cell
+                    key={entry.name}
+                    fill={CHART_COLORS[pieData.indexOf(entry) % CHART_COLORS.length]}
+                  />
                 ))}
               </Pie>
               <Tooltip

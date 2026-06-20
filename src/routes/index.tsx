@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { Toaster } from "sonner";
+import { useCallback, useState } from "react";
+import { toast, Toaster } from "sonner";
 import { Sidebar, type ViewKey } from "@/components/eco/Sidebar";
 import { Dashboard } from "@/components/eco/Dashboard";
 import { Calculator } from "@/components/eco/Calculator";
@@ -36,47 +36,59 @@ function Index() {
 
   const view = !state.onboarded ? "calculator" : viewState;
 
-  function setView(v: ViewKey) {
-    if (!state.onboarded && v !== "calculator") {
-      toast.info("Please calculate your footprint first.");
-      return;
-    }
-    setViewState(v);
-  }
+  const setView = useCallback(
+    (v: ViewKey) => {
+      if (!state.onboarded && v !== "calculator") {
+        toast.info("Please calculate your footprint first.");
+        return;
+      }
+      setViewState(v);
+    },
+    [state.onboarded],
+  );
 
-  function saveFootprint(footprint: UserFootprint) {
-    setState((s) => ({ ...s, footprint, onboarded: true }));
-  }
+  const saveFootprint = useCallback(
+    (footprint: UserFootprint) => {
+      setState((s) => ({ ...s, footprint, onboarded: true }));
+    },
+    [setState],
+  );
 
-  function logAction(action: EcoAction) {
-    const date = todayKey();
-    setState((s) => {
-      const isLogged = s.log.some((l) => l.actionId === action.id && l.date === date);
-      if (isLogged) {
+  const logAction = useCallback(
+    (action: EcoAction) => {
+      const date = todayKey();
+      setState((s) => {
+        const isLogged = s.log.some((l) => l.actionId === action.id && l.date === date);
+        if (isLogged) {
+          return {
+            ...s,
+            points: Math.max(0, s.points - action.points),
+            log: s.log.filter((l) => !(l.actionId === action.id && l.date === date)),
+          };
+        }
         return {
           ...s,
-          points: Math.max(0, s.points - action.points),
-          log: s.log.filter((l) => !(l.actionId === action.id && l.date === date)),
+          points: s.points + action.points,
+          log: [...s.log, { actionId: action.id, date }],
         };
-      }
-      return {
-        ...s,
-        points: s.points + action.points,
-        log: [...s.log, { actionId: action.id, date }],
-      };
-    });
-  }
+      });
+    },
+    [setState],
+  );
 
-  function togglePlan(tipId: string) {
-    setState((s) => {
-      const planned = s.planned || [];
-      const isPlanned = planned.includes(tipId);
-      if (isPlanned) {
-        return { ...s, planned: planned.filter((id) => id !== tipId) };
-      }
-      return { ...s, planned: [...planned, tipId] };
-    });
-  }
+  const togglePlan = useCallback(
+    (tipId: string) => {
+      setState((s) => {
+        const planned = s.planned ?? [];
+        const isPlanned = planned.includes(tipId);
+        if (isPlanned) {
+          return { ...s, planned: planned.filter((id) => id !== tipId) };
+        }
+        return { ...s, planned: [...planned, tipId] };
+      });
+    },
+    [setState],
+  );
 
   return (
     <div className="flex min-h-dvh w-full flex-col md:flex-row">

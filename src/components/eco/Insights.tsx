@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { Sparkles, ArrowUpRight, Gauge, Send, Bot, User, Plus, Check } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { Sparkles, Gauge, Send, Bot, User, Plus, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { AppState } from "@/lib/eco/types";
@@ -8,6 +8,9 @@ import { getInsightsFor } from "@/lib/eco/calc";
 import { askGemini } from "@/lib/api/gemini.functions";
 import { cn } from "@/lib/utils";
 
+/**
+ * Maps internal category keys to human-readable labels for the UI.
+ */
 const CATEGORY_LABEL: Record<string, string> = {
   travel: "Travel",
   home: "Home energy",
@@ -15,11 +18,14 @@ const CATEGORY_LABEL: Record<string, string> = {
   consumption: "Goods & shopping",
 };
 
+/** Props for the Insights page component. */
 export function Insights({
   state,
   onTogglePlan,
 }: {
+  /** Full application state to derive personalised recommendations from. */
   state: AppState;
+  /** Called when the user adds or removes an insight from their plan. */
   onTogglePlan: (id: string) => void;
 }) {
   const [messages, setMessages] = useState<{ role: "user" | "bot"; content: string }[]>([
@@ -40,36 +46,39 @@ export function Insights({
 
   const { breakdown, topCategory: top } = useCarbonCalculator(state.footprint);
 
-  const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputValue.trim()) return;
+  const handleSend = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!inputValue.trim()) return;
 
-    const currentInput = inputValue;
-    const newMessages = [...messages, { role: "user" as const, content: currentInput }];
-    setMessages(newMessages);
-    setInputValue("");
+      const currentInput = inputValue;
+      setMessages((prev) => [...prev, { role: "user" as const, content: currentInput }]);
+      setInputValue("");
+      // Add a temporary loading message
+      setMessages((prev) => [...prev, { role: "bot", content: "..." }]);
 
-    // Add a temporary loading message
-    setMessages((prev) => [...prev, { role: "bot", content: "..." }]);
-
-    try {
-      const response = await askGemini({
-        data: {
-          query: currentInput,
-          footprint: state.footprint,
-          breakdown,
-        },
-      });
-
-      // Replace loading message with real response
-      setMessages((prev) => [...prev.slice(0, -1), { role: "bot", content: response.answer }]);
-    } catch (error) {
-      setMessages((prev) => [
-        ...prev.slice(0, -1),
-        { role: "bot", content: "Sorry, I had trouble connecting to my AI brain." },
-      ]);
-    }
-  };
+      try {
+        const response = await askGemini({
+          data: {
+            query: currentInput,
+            footprint: state.footprint,
+            breakdown,
+          },
+        });
+        // Replace loading message with real response
+        setMessages((prev) => [...prev.slice(0, -1), { role: "bot", content: response.answer }]);
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Sorry, I had trouble connecting to my AI brain.";
+        console.error("[Eco Assistant] Chat error:", message);
+        setMessages((prev) => [
+          ...prev.slice(0, -1),
+          { role: "bot", content: "Sorry, I had trouble connecting to my AI brain." },
+        ]);
+      }
+    },
+    [breakdown, inputValue, state.footprint],
+  );
 
   const tips = getInsightsFor(breakdown);
   // Brief: surface exactly 3 actionable, personalised recommendations.

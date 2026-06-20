@@ -19,9 +19,9 @@ const breakdownSchema = z.object({
 function sanitizeQuery(raw: string): string {
   return raw
     .replace(/[<>{}[\]\\`]/g, "") // strip markup/code characters
-    .replace(/\n{3,}/g, "\n\n")   // collapse excessive newlines
+    .replace(/\n{3,}/g, "\n\n") // collapse excessive newlines
     .trim()
-    .slice(0, 500);                // hard length cap
+    .slice(0, 500); // hard length cap
 }
 
 export const askGemini = createServerFn({ method: "POST" })
@@ -36,7 +36,9 @@ export const askGemini = createServerFn({ method: "POST" })
     try {
       const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
       if (!GEMINI_API_KEY) {
-        throw new Error("SERVER MISCONFIGURATION: GEMINI_API_KEY is missing from environment variables.");
+        throw new Error(
+          "SERVER MISCONFIGURATION: GEMINI_API_KEY is missing from environment variables.",
+        );
       }
       const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
       const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
@@ -77,7 +79,9 @@ export const generatePersonalizedActions = createServerFn({ method: "POST" })
     try {
       const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
       if (!GEMINI_API_KEY) {
-        throw new Error("SERVER MISCONFIGURATION: GEMINI_API_KEY is missing from environment variables.");
+        throw new Error(
+          "SERVER MISCONFIGURATION: GEMINI_API_KEY is missing from environment variables.",
+        );
       }
       const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
       const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });

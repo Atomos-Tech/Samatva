@@ -37,12 +37,6 @@ export const DEFAULT_STATE: AppState = {
   history: seedHistory(), // Keep 6-month seed data as requested by user previously
 };
 
-function dayOffset(days: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
-}
-
 function load(): AppState {
   if (typeof window === "undefined") return DEFAULT_STATE;
   try {
@@ -86,6 +80,14 @@ export function useAppState() {
   return { state, setState, hydrated };
 }
 
+/**
+ * Computes the current consecutive eco-action streak in days.
+ *
+ * Rules:
+ *  - Today may be un-logged without breaking the streak (it's still in progress).
+ *  - A single gap in the log ends the streak immediately.
+ *  - Returns 0 for an empty log.
+ */
 export function computeStreak(log: ActionLog[]): number {
   const days = new Set(log.map((l) => l.date));
   let streak = 0;
@@ -107,6 +109,7 @@ export function computeStreak(log: ActionLog[]): number {
   return streak;
 }
 
+/** Returns today's date in ISO yyyy-mm-dd format. */
 export function todayKey(): string {
   return new Date().toISOString().slice(0, 10);
 }

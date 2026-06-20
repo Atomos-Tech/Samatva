@@ -1,29 +1,4 @@
-// test file; install `vitest` to type-check & execute (see header).
-/**
- * EcoTrace — Carbon math unit tests.
- *
- * These tests are written for Vitest (drop-in Jest API). To run:
- *   bun add -d vitest @vitest/coverage-v8
- *   bunx vitest run
- *
- * Coverage rationale
- * ------------------
- * Every function in `calc.ts` is pure (deterministic, side-effect free,
- * dependency-free) so each branch is unit-testable in isolation.
- *
- * The hook layer (`useCarbonCalculator`) is intentionally a thin
- * `useMemo` wrapper around these utilities, which means we get full
- * confidence in the hook via the unit tests below without needing
- * a React renderer for the math layer.
- *
- * Integration test outline (RTL, separate file):
- *  - render <Calculator />, fire slider events, assert that the
- *    `data-testid="calculator-live-total"` node reflects the value
- *    produced by `computeBreakdown` for the same input.
- *  - render <Dashboard /> with a known footprint and assert that the
- *    radial gauge text matches `useCarbonCalculator(...).impactScore`.
- */
-import { describe, expect, it } from "vitest";
+import { describe, it, expect } from "vitest";
 import { computeBreakdown, totalKg, highestCategory, getInsightsFor } from "../calc";
 import type { UserFootprint } from "../types";
 
@@ -73,6 +48,56 @@ describe("computeBreakdown", () => {
     });
     expect(vegan.diet).toBeLessThan(heavy.diet);
   });
+
+  it("returns zero travel for a car-free, flight-free user", () => {
+    const b = computeBreakdown({
+      ...baseline,
+      travel: { carKmPerWeek: 0, flightsPerYear: 0, publicTransitKmPerWeek: 0 },
+    });
+    expect(b.travel).toBe(0);
+  });
+
+  it("all-zeros footprint yields non-negative outputs", () => {
+    const b = computeBreakdown({
+      travel: { carKmPerWeek: 0, flightsPerYear: 0, publicTransitKmPerWeek: 0 },
+      home: { electricityKwhPerMonth: 0, gasKwhPerMonth: 0, renewablePercent: 0 },
+      diet: { type: "vegan", foodWasteLevel: 1 },
+      consumption: { shoppingLevel: 1, recyclesPercent: 100 },
+    });
+    for (const v of Object.values(b)) {
+      expect(v).toBeGreaterThanOrEqual(0);
+    }
+  });
+
+  it("higher shopping levels yield higher consumption emissions", () => {
+    const low = computeBreakdown({
+      ...baseline,
+      consumption: { shoppingLevel: 1, recyclesPercent: 0 },
+    });
+    const high = computeBreakdown({
+      ...baseline,
+      consumption: { shoppingLevel: 5, recyclesPercent: 0 },
+    });
+    expect(high.consumption).toBeGreaterThan(low.consumption);
+  });
+
+  it("recycling 100% reduces consumption vs recycling 0%", () => {
+    const none = computeBreakdown({
+      ...baseline,
+      consumption: { shoppingLevel: 3, recyclesPercent: 0 },
+    });
+    const full = computeBreakdown({
+      ...baseline,
+      consumption: { shoppingLevel: 3, recyclesPercent: 100 },
+    });
+    expect(full.consumption).toBeLessThanOrEqual(none.consumption);
+  });
+
+  it("higher food waste level yields higher diet emissions", () => {
+    const low = computeBreakdown({ ...baseline, diet: { type: "omnivore", foodWasteLevel: 1 } });
+    const high = computeBreakdown({ ...baseline, diet: { type: "omnivore", foodWasteLevel: 5 } });
+    expect(high.diet).toBeGreaterThan(low.diet);
+  });
 });
 
 describe("totalKg + highestCategory", () => {
@@ -81,12 +106,26 @@ describe("totalKg + highestCategory", () => {
     expect(totalKg(b)).toBe(b.travel + b.home + b.diet + b.consumption);
   });
 
+  it("totalKg returns 0 for a zero breakdown", () => {
+    expect(totalKg({ travel: 0, home: 0, diet: 0, consumption: 0 })).toBe(0);
+  });
+
   it("highestCategory identifies the dominant emission source", () => {
     const flyer = computeBreakdown({
       ...baseline,
       travel: { carKmPerWeek: 500, flightsPerYear: 20, publicTransitKmPerWeek: 0 },
     });
     expect(highestCategory(flyer)).toBe("travel");
+  });
+
+  it("highestCategory returns diet when diet dominates", () => {
+    const meatEater = computeBreakdown({
+      travel: { carKmPerWeek: 0, flightsPerYear: 0, publicTransitKmPerWeek: 0 },
+      home: { electricityKwhPerMonth: 0, gasKwhPerMonth: 0, renewablePercent: 100 },
+      diet: { type: "heavy_meat", foodWasteLevel: 5 },
+      consumption: { shoppingLevel: 1, recyclesPercent: 100 },
+    });
+    expect(highestCategory(meatEater)).toBe("diet");
   });
 });
 
@@ -98,5 +137,24 @@ describe("getInsightsFor", () => {
     });
     const tips = getInsightsFor(flyer);
     expect(tips[0]?.category).toBe("travel");
+  });
+
+  it("returns at least one recommendation per category", () => {
+    const b = computeBreakdown(baseline);
+    const tips = getInsightsFor(b);
+    const categories = new Set(tips.map((t) => t.category));
+    expect(categories.size).toBeGreaterThanOrEqual(2);
+  });
+
+  it("all returned recommendations have required fields", () => {
+    const b = computeBreakdown(baseline);
+    const tips = getInsightsFor(b);
+    for (const tip of tips) {
+      expect(tip).toHaveProperty("id");
+      expect(tip).toHaveProperty("title");
+      expect(tip).toHaveProperty("body");
+      expect(tip).toHaveProperty("impactKg");
+      expect(tip).toHaveProperty("difficulty");
+    }
   });
 });

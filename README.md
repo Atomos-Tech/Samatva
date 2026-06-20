@@ -5,6 +5,7 @@ Samatva is an intelligent, gamified platform designed to solve **[Challenge 3]**
 ---
 
 ## 📌 Chosen Vertical
+
 **Sustainability & Climate Tech** (Carbon Footprint Awareness Platform)
 
 Samatva specifically targets the disconnect between global climate awareness and individual action. By translating abstract carbon tonnes into simple, personalized daily micro-actions, we empower individuals to actively participate in the solution.
@@ -13,13 +14,14 @@ Samatva specifically targets the disconnect between global climate awareness and
 
 ## 🧠 Approach and Logic
 
-Our core logic is built on the premise that **awareness without action is ineffective.** Most eco-apps fail because they stop at acting as a static calculator. Our approach bridges that gap by merging high-accuracy carbon modeling with AI-driven gamification. 
+Our core logic is built on the premise that **awareness without action is ineffective.** Most eco-apps fail because they stop at acting as a static calculator. Our approach bridges that gap by merging high-accuracy carbon modeling with AI-driven gamification.
 
-To achieve 100% problem statement alignment ("*understand, track, and reduce... through simple actions and personalized insights*"), we architected the platform around four logical pillars:
+To achieve 100% problem statement alignment ("_understand, track, and reduce... through simple actions and personalized insights_"), we architected the platform around four logical pillars:
+
 1. **Understand (Granular Modeling)**: We don't just ask for generic data. We model specific lifestyle vectors (e.g., kWh of grid vs. renewable energy, specific diet archetypes, flights per year) to calculate a highly accurate live footprint.
 2. **Track (Visual Progress)**: We visualize the user's footprint against the Paris 2030 targets and maintain a historical 6-month trend line to visually reinforce positive behavioral changes.
-3. **Personalized Insights (AI Brain)**: Instead of generic advice, we feed the user's exact emission breakdown (Travel, Home, Diet, Consumption) into Google's **Gemini 2.5 Flash** model. 
-4. **Reduce via Simple Actions (ActionHub)**: The AI generates *custom, clickable* daily tasks tailored to the user's highest emission categories. Completing these tasks builds a "Green Streak," rewards eco-points, and actively subtracts kg CO₂e from their live footprint.
+3. **Personalized Insights (AI Brain)**: Instead of generic advice, we feed the user's exact emission breakdown (Travel, Home, Diet, Consumption) into Google's **Gemini 2.5 Flash** model.
+4. **Reduce via Simple Actions (ActionHub)**: The AI generates _custom, clickable_ daily tasks tailored to the user's highest emission categories. Completing these tasks builds a "Green Streak," rewards eco-points, and actively subtracts kg CO₂e from their live footprint.
 
 ---
 
@@ -36,7 +38,7 @@ To achieve 100% problem statement alignment ("*understand, track, and reduce... 
 ## 📝 Assumptions Made
 
 1. **Standardized Coefficients**: We assume standard EPA/IPCC average emission coefficients for our mathematical models (e.g., a standard kg CO₂e per kWh, average car emissions per km). True real-world tracking would require direct integration with the user's utility providers.
-2. **User Honesty**: The gamification and Green Streak system currently relies on the honor system for logging completed actions. 
+2. **User Honesty**: The gamification and Green Streak system currently relies on the honor system for logging completed actions.
 3. **Static Action Equivalency**: We assume that completing a daily action saves a static, estimated amount of kg CO₂e (as modeled by the AI) rather than utilizing live telemetry data.
 4. **Security Posture**: We assumed deployment requires high security for API credentials. Therefore, no Gemini API keys are exposed on the client. All AI generation is safely sandboxed and executed in TanStack server functions.
 
@@ -52,12 +54,14 @@ To achieve 100% problem statement alignment ("*understand, track, and reduce... 
 ## 🛠️ Getting Started
 
 ### Prerequisites
+
 - Node.js (v18+)
 - `npm` or `bun`
 
 ### Installation
 
 1. Clone the repository and install dependencies:
+
    ```bash
    git clone <repository-url>
    cd Samatva
@@ -65,11 +69,13 @@ To achieve 100% problem statement alignment ("*understand, track, and reduce... 
    ```
 
 2. Setup Environment Variables by creating a `.env` file:
+
    ```bash
    GEMINI_API_KEY=your_gemini_api_key_here
    ```
 
 3. Run the local development server:
+
    ```bash
    npm run dev
    ```

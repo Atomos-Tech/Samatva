@@ -1,9 +1,9 @@
-import { describe, expect, it } from "vitest";
-import { computeStreak } from "../store";
+import { describe, it, expect } from "vitest";
+import { computeStreak, todayKey } from "../store";
 import type { ActionLog } from "../types";
 
 /**
- * Unit tests for `computeStreak`.
+ * Unit tests for `computeStreak` and `todayKey`.
  *
  * The streak algorithm has subtle branching logic:
  *  - Today can be un-logged without breaking the streak (it's still in progress).
@@ -72,5 +72,30 @@ describe("computeStreak", () => {
       { actionId: "unplug", date: dateOffset(-1) },
     ];
     expect(computeStreak(log)).toBe(1);
+  });
+
+  it("returns 0 for future-dated log entries", () => {
+    // Future logs should not count toward a streak.
+    const log = makeLog([2, 3]);
+    expect(computeStreak(log)).toBe(0);
+  });
+
+  it("handles a very long streak correctly", () => {
+    const offsets = Array.from({ length: 30 }, (_, i) => -(i + 1));
+    const log = makeLog(offsets);
+    expect(computeStreak(log)).toBe(30);
+  });
+});
+
+describe("todayKey", () => {
+  it("returns a string in yyyy-mm-dd format", () => {
+    const key = todayKey();
+    expect(key).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it("matches today's date", () => {
+    const key = todayKey();
+    const expected = new Date().toISOString().slice(0, 10);
+    expect(key).toBe(expected);
   });
 });

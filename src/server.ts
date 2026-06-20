@@ -42,14 +42,14 @@ function withSecurityHeaders(response: Response): Response {
   secureHeaders.set("X-Content-Type-Options", "nosniff");
   secureHeaders.set("X-Frame-Options", "DENY");
   secureHeaders.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
-  
+
   if (!secureHeaders.has("Content-Security-Policy")) {
     secureHeaders.set(
       "Content-Security-Policy",
-      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data: https:; connect-src 'self' https: wss:;"
+      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data: https:; connect-src 'self' https: wss:;",
     );
   }
-  
+
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,

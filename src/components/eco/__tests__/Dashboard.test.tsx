@@ -14,9 +14,7 @@ vi.mock("../ProgressSummary", () => ({
   ProgressSummary: () => <div data-testid="progress-summary-mock">Progress Mock</div>,
 }));
 
-// Mock lucide icons that Dashboard.test.tsx directly references.
-// Use importOriginal to preserve all other icons (e.g. Loader2, Sparkles used
-// by WelcomeInsight, and ProgressSummary's TrendingDown/TrendingUp/Minus).
+// Mock lucide icons that Dashboard directly references.
 vi.mock("lucide-react", async (importOriginal) => {
   const actual = await importOriginal<typeof import("lucide-react")>();
   return {
@@ -39,6 +37,7 @@ vi.mock("@/hooks/useDashboardMetrics", () => ({
     totalTonnes: 4.5,
     impactScore: 85,
     totalSavings: 12,
+    adjusted: 4400,
     compareData: [],
     trend: -5.2,
     trendHistory: [],
@@ -51,20 +50,47 @@ describe("Dashboard Component", () => {
     cleanup();
   });
 
-  it("renders correctly with mocked live impact score", () => {
-    const state = DEFAULT_STATE;
-    render(<Dashboard state={state} />);
-
-    // Verify the heading and total tonnes from our mock
+  it("renders the hero heading with total tonnes", () => {
+    render(<Dashboard state={DEFAULT_STATE} />);
     const heading = screen.getByRole("heading", { level: 1 });
     expect(heading.textContent).toContain("4.50 t CO₂e");
+  });
 
-    // Verify streak and savings are rendered
+  it("renders actions logged count and streak", () => {
+    render(<Dashboard state={DEFAULT_STATE} />);
     expect(screen.getByText(/12 actions logged/i)).toBeDefined();
     expect(screen.getByText(/3-day streak/i)).toBeDefined();
+  });
 
-    // Verify impact gauge and charts mock
+  it("renders the impact gauge", () => {
+    render(<Dashboard state={DEFAULT_STATE} />);
     expect(screen.getByTestId("impact-gauge")).toBeDefined();
+  });
+
+  it("renders the charts panel placeholder", () => {
+    render(<Dashboard state={DEFAULT_STATE} />);
     expect(screen.getByTestId("charts-panel-mock")).toBeDefined();
+  });
+
+  it("renders the progress summary section", () => {
+    render(<Dashboard state={DEFAULT_STATE} />);
+    expect(screen.getByTestId("progress-summary-mock")).toBeDefined();
+  });
+
+  it("renders metric cards (Daily Tip, Monthly Trend, Eco-Points)", () => {
+    render(<Dashboard state={DEFAULT_STATE} />);
+    expect(screen.getByText(/Daily Tip/i)).toBeDefined();
+    expect(screen.getByText(/Monthly Trend/i)).toBeDefined();
+    expect(screen.getByText(/Eco-Points Earned/i)).toBeDefined();
+  });
+
+  it("shows the 'Live impact score' label", () => {
+    render(<Dashboard state={DEFAULT_STATE} />);
+    expect(screen.getByText(/Live impact score/i)).toBeDefined();
+  });
+
+  it("renders the Samatva description text in the hero", () => {
+    render(<Dashboard state={DEFAULT_STATE} />);
+    expect(screen.getByText(/Samatva continuously scores your lifestyle/i)).toBeDefined();
   });
 });
