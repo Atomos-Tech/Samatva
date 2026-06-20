@@ -9,9 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
  * context.  By hiding the real import behind `React.lazy`, the module is only
  * loaded in the browser after hydration — preventing the server-side crash.
  */
-const GlobalMapImpl = lazy(() =>
-  import("./GlobalMap").then((m) => ({ default: m.GlobalMap })),
-);
+const GlobalMapImpl = lazy(() => import("./GlobalMap").then((m) => ({ default: m.GlobalMap })));
 
 function GlobalMapSkeleton() {
   return (
