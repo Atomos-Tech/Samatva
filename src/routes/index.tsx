@@ -6,7 +6,7 @@ import { Dashboard } from "@/components/eco/Dashboard";
 import { Calculator } from "@/components/eco/Calculator";
 import { ActionHub } from "@/components/eco/ActionHub";
 import { Insights } from "@/components/eco/Insights";
-import { GlobalMap } from "@/components/eco/GlobalMap";
+import { GlobalMapLazy } from "@/components/eco/GlobalMapLazy";
 import { useAppState, todayKey } from "@/lib/eco/store";
 import type { EcoAction, UserFootprint } from "@/lib/eco/types";
 
@@ -106,7 +106,7 @@ function Index() {
           ) : view === "actions" ? (
             <ActionHub state={state} onLog={logAction} />
           ) : view === "map" ? (
-            <GlobalMap />
+            <GlobalMapLazy />
           ) : (
             <Insights state={state} onTogglePlan={togglePlan} />
           )}

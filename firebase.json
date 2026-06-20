@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "dist/client",
+    "public": ".output/public",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {
@@ -10,3 +10,4 @@
     ]
   }
 }
+
