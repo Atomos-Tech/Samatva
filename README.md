@@ -116,10 +116,10 @@ To hit **100%** across Hackathon grading rubrics while navigating real-world dep
    ```
 
 2. **Setup Environment Variables:**
-   Create a `.env` file in the root directory. Because of our client-side pivot for Firebase Static Hosting, both variables are required:
+   Create a `.env` file in the root directory.
    ```bash
    GEMINI_API_KEY=your_gemini_api_key_here
-   VITE_GEMINI_API_KEY=your_gemini_api_key_here
+   VITE_FIREBASE_API_KEY=your_firebase_public_key_here
    ```
 
 3. **Run the local development server:**
