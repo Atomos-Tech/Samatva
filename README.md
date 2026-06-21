@@ -2,6 +2,7 @@
   <h1>🌱 Samatva</h1>
   <p><strong>The AI-Powered Eco Assistant & Carbon Gamification Platform</strong></p>
   <p><em>Translating global climate targets into personalized, trackable daily actions.</em></p>
+  <p><strong>🌍 <a href="https://samatva-499902.web.app">Live Demo: https://samatva-499902.web.app</a></strong></p>
 </div>
 
 ---
@@ -109,7 +110,7 @@ To hit **100%** across Hackathon grading rubrics while navigating real-world dep
 
 1. **Clone the repository:**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Atomos-Tech/Samatva.git
    cd Samatva
    npm install
    ```
