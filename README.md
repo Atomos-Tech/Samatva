@@ -29,9 +29,20 @@ To achieve 100% problem statement alignment ("_understand, track, and reduce... 
 
 1. **Dynamic Assessment**: The user completes an onboarding calculator detailing their travel habits, home energy usage, and consumption behaviors. The app calculates their live annual CO₂e footprint in tonnes.
 2. **Interactive Global Benchmarking**: A dynamic 3D globe visualization allows users to compare their personal footprint against the average citizen in countries worldwide, providing global context to their lifestyle.
-3. **AI-Driven Personalization**: The user clicks "Generate Personalized Actions" in the ActionHub. The app securely calls a server-side TanStack function, passing their footprint breakdown to the Gemini API. Gemini returns 3 highly tailored, trackable daily actions (e.g., "Because your transport emissions are high, try taking the bus today for +15 pts").
+3. **AI-Driven Personalization**: The user clicks "Generate Personalized Actions" in the ActionHub. The app calls the Gemini API securely, passing their footprint breakdown to generate 3 highly tailored, trackable daily actions.
 4. **Gamified Tracking Loop**: Users complete actions in the "ActionHub" to build their Green Streak. The system dynamically reduces their live carbon footprint metrics based on the specific CO₂e savings of the logged actions, providing instant positive reinforcement.
 5. **Eco Assistant**: A continuous chat interface powered by Gemini is always available for the user to ask highly specific questions regarding their unique carbon footprint data.
+
+---
+
+## 🔐 Architecture & Brutally Honest Technical Trade-offs
+
+To hit 100% across our Hackathon grading rubric while dealing with real-world deployment constraints, we made several brutal architectural pivots:
+
+1. **Client-Side AI Pivot**: We originally built the Gemini API integrations inside secure Node.js `createServerFn` backend handlers. However, deploying a Nitro-based server app to **Firebase Static Hosting** meant we had no Node.js server. To prevent 404 errors on the live site, we moved the Gemini calls to the client-side. We rely on strict HTTP Referrer restrictions in the Google Cloud Console to prevent API key abuse, rather than server-side obfuscation.
+2. **Deployment Automation (`deploy.sh`)**: Static hosting with hashed JS assets inherently breaks when deploying a React SPA if the `index.html` falls out of sync. We wrote a custom `./deploy.sh` script that automatically builds the app, boots a local server, captures a fresh SSR-rendered `index.html`, and pushes the atomically synced assets to Firebase. 
+3. **Strict Database Security Rules**: We locked down Firebase Firestore with a `firestore.rules` configuration that strictly rejects all global reads/writes, forcing 100% user-authenticated UID ownership over all documents to pass security audits.
+4. **Accessibility Overhaul**: We integrated `aria-live="polite"` tags deeply into the AI generation flows so screen readers properly announce asynchronous AI responses when they replace loading spinners without page navigations.
 
 ---
 
@@ -40,16 +51,16 @@ To achieve 100% problem statement alignment ("_understand, track, and reduce... 
 1. **Standardized Coefficients**: We assume standard EPA/IPCC average emission coefficients for our mathematical models (e.g., a standard kg CO₂e per kWh, average car emissions per km). True real-world tracking would require direct integration with the user's utility providers.
 2. **User Honesty**: The gamification and Green Streak system currently relies on the honor system for logging completed actions.
 3. **Static Action Equivalency**: We assume that completing a daily action saves a static, estimated amount of kg CO₂e (as modeled by the AI) rather than utilizing live telemetry data.
-4. **Security Posture**: We assumed deployment requires high security for API credentials. Therefore, no Gemini API keys are exposed on the client. All AI generation is safely sandboxed and executed in TanStack server functions.
 
 ---
 
 ## 🚀 Tech Stack
 
-- **Frontend**: React, Vite, Tailwind CSS, Lucide React (for iconography)
-- **Framework**: TanStack Start (for secure Server Functions)
+- **Frontend**: React, Vite, Tailwind CSS, Lucide React
+- **Framework**: TanStack Start (SSR generation)
 - **Artificial Intelligence**: Google Gemini API (`gemini-2.5-flash`) via `@google/generative-ai`
-- **Backend/Security**: Prepared for Firebase App Check & Firestore
+- **Backend/Security**: Firebase Hosting, Firebase Auth, Firestore
+- **Mapping**: Leaflet (Lazy-loaded to prevent SSR hydration mismatches)
 
 ## 🛠️ Getting Started
 
@@ -71,7 +82,9 @@ To achieve 100% problem statement alignment ("_understand, track, and reduce... 
 2. Setup Environment Variables by creating a `.env` file:
 
    ```bash
+   # Both keys are required to support local dev and client-side builds
    GEMINI_API_KEY=your_gemini_api_key_here
+   VITE_GEMINI_API_KEY=your_gemini_api_key_here
    ```
 
 3. Run the local development server:
@@ -80,4 +93,7 @@ To achieve 100% problem statement alignment ("_understand, track, and reduce... 
    npm run dev
    ```
 
-4. Open your browser to the local address provided (typically `http://localhost:5173` or `http://localhost:8080`).
+4. **Production Deployment**: ALWAYS use the provided deployment script to ensure the SSR HTML is synchronized with the Vite hashed JS assets.
+   ```bash
+   ./deploy.sh
+   ```
